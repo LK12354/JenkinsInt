@@ -60,49 +60,26 @@ pipeline {
         }
     }
 
-    post {
+   post {
+    always {
+        echo 'Publishing Playwright HTML report'
 
-        always {
-            echo "Publishing Playwright HTML report"
-
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'playwright-report',
-                reportFiles: 'index.html',
-                reportName: 'Playwright Test Report'
-            ])
-        }
-
-        failure {
-            echo "Build failed — sending Teams notification"
-
-            sh """
-            curl -H 'Content-Type: application/json' -d '{
-              "@type": "MessageCard",
-              "@context": "http://schema.org/extensions",
-              "summary": "Playwright Sanity Failed",
-              "themeColor": "FF0000",
-              "title": "❌ Playwright Sanity Test Failed",
-              "text": "Check Jenkins report: ${BUILD_URL}"
-            }' ${TEAMS_WEBHOOK}
-            """
-        }
-
-        success {
-            echo "Build successful — sending Teams notification"
-
-            sh """
-            curl -H 'Content-Type: application/json' -d '{
-              "@type": "MessageCard",
-              "@context": "http://schema.org/extensions",
-              "summary": "Playwright Sanity Passed",
-              "themeColor": "00FF00",
-              "title": "✅ Playwright Sanity Test Passed",
-              "text": "Report: ${BUILD_URL}"
-            }' ${TEAMS_WEBHOOK}
-            """
-        }
+        publishHTML([
+            allowMissing: true,
+            alwaysLinkToLastBuild: true,
+            keepAll: true,
+            reportDir: 'playwright-report',
+            reportFiles: 'index.html',
+            reportName: 'Playwright HTML Report'
+        ])
     }
+
+    failure {
+        echo 'Build failed – check Playwright HTML report'
+    }
+
+    success {
+        echo 'Build succeeded – Playwright tests passed'
+    }
+}
 }
